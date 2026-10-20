@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="description" content="三弘道长 · 签文查询 · 吕祖灵签">
+<meta name="theme-color" content="#8c1a1a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="签文查询">
+<meta name="application-name" content="签文查询">
+<title>签文查询 · 吕祖灵签</title>
+<style>
+  :root {
+    --red: #8c1a1a;
+    --red-deep: #570e0e;
+    --gold: #c9a227;
+    --gold-light: #e8cd74;
+    --ink-light: #f6ecd2;
+    --kai: "STKaiti", "KaiTi", "楷体", "Kaiti SC", "FangSong", "STFangsong", serif;
+    --song: "Songti SC", "STSong", "SimSun", "宋体", serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { height: 100%; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  body {
+    height: 100%;
+    font-family: var(--kai);
+    color: var(--ink-light);
+    background-color: #3d0808;
+    min-height: 100vh; min-height: 100svh;
+    overflow-x: hidden; position: relative;
+    touch-action: manipulation;
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none;
+    overscroll-behavior-y: contain;
+  }
+
+  /* ============ 雕梁画栋 背景 ============ */
+  .temple {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(1200px 700px at 50% -10%, rgba(232,205,116,.10), transparent 60%),
+      radial-gradient(900px 600px at 50% 115%, rgba(0,0,0,.5), transparent 60%),
+      linear-gradient(180deg, #6b1212 0%, #8c1a1a 30%, #5f0f0f 70%, #3d0808 100%);
+  }
+  .temple svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  .page {
+    position: relative; z-index: 2;
+    min-height: 100vh; min-height: 100svh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: calc(16px + env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom));
+  }
+
+  /* ============ 牌匾 ============ */
+  .plaque {
+    margin-top: 20px; text-align: center;
+    padding: 15px 30px 13px;
+    background: linear-gradient(180deg, #3a1a0a, #241006 55%, #3a1a0a);
+    border: 2px solid var(--gold); outline: 1px solid #120602;
+    box-shadow: 0 6px 20px rgba(0,0,0,.5), inset 0 0 0 2px #120602, inset 0 0 18px rgba(0,0,0,.55);
+    border-radius: 6px; position: relative;
+  }
+  .plaque h1 {
+    font-size: clamp(26px, 7vw, 40px); letter-spacing: .3em; padding-left: .3em;
+    color: var(--gold-light); text-shadow: 0 0 14px rgba(232,205,116,.6), 0 2px 2px #160804; font-weight: 700;
+  }
+  .plaque .sub { margin-top: 5px; font-size: clamp(12px, 3.2vw, 15px); letter-spacing: .45em; padding-left: .45em; color: #d8c08a; }
+  .plaque::before, .plaque::after { content: "❖"; position: absolute; top: 50%; transform: translateY(-50%); color: var(--gold); font-size: 13px; }
+  .plaque::before { left: 10px; } .plaque::after { right: 10px; }
+
+  /* ============ 查询区 ============ */
+  .search {
+    margin-top: 22px; width: min(94vw, 460px);
+    padding: 20px 18px;
+    background: linear-gradient(180deg, #3a1a0a, #241006);
+    border: 2px solid var(--gold); outline: 1px solid #120602; border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(0,0,0,.5), inset 0 0 18px rgba(0,0,0,.5);
+  }
+  .search-label { text-align: center; color: #e8d9a8; font-size: 14px; letter-spacing: .2em; padding-left: .2em; margin-bottom: 14px; }
+  .search-row { display: flex; gap: 10px; }
+  input.q {
+    flex: 1; min-width: 0;
+    font-family: var(--kai); font-size: clamp(20px, 6vw, 26px); text-align: center;
+    color: #fff6e2; background: #2a1108;
+    border: 2px solid var(--gold); border-radius: 10px; padding: 10px 6px;
+    letter-spacing: .1em; outline: none;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,.5);
+  }
+  input.q::placeholder { color: #a98b60; }
+  input.q:focus { border-color: var(--gold-light); box-shadow: 0 0 10px rgba(232,205,116,.35), inset 0 2px 6px rgba(0,0,0,.5); }
+  .btn-go {
+    flex: 0 0 auto; padding: 0 26px;
+    font-family: var(--kai); font-size: clamp(18px, 5vw, 22px); letter-spacing: .2em; text-indent: .2em;
+    color: #fff6e2;
+    background: linear-gradient(180deg, #b82b1e, #8c1a1a 45%, #570e0e 100%);
+    border: 2px solid var(--gold); border-radius: 10px; cursor: pointer;
+    box-shadow: 0 5px 14px rgba(0,0,0,.5), inset 0 1px 1px rgba(255,255,255,.3);
+    text-shadow: 0 1px 2px rgba(0,0,0,.4); transition: transform .15s ease;
+  }
+  .btn-go:active { transform: scale(.96); }
+
+  .grid { margin-top: 14px; display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; }
+  .num-btn {
+    font-family: var(--kai); font-size: 14px; line-height: 1; padding: 9px 0;
+    color: #f3e2b0; background: linear-gradient(180deg, #4a2010, #2a1108);
+    border: 1px solid rgba(201,162,39,.55); border-radius: 7px; cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,.4); transition: transform .1s ease;
+  }
+  .num-btn:active { transform: scale(.9); background: #8c1a1a; color: #fff; }
+
+  /* ============ 结果区 ============ */
+  .result { margin-top: 22px; width: min(94vw, 480px); }
+  .result-card {
+    padding: 28px 24px 24px;
+    background: linear-gradient(180deg, #fbf3df 0%, #f3e6c8 100%);
+    color: #3a2a12;
+    border: 3px solid var(--gold); outline: 2px solid #7a5c22; border-radius: 12px;
+    box-shadow: 0 16px 40px rgba(0,0,0,.55), inset 0 0 0 3px #fbf3df, inset 0 0 0 4px rgba(201,162,39,.5);
+    position: relative; animation: cardIn .5s cubic-bezier(.2,.9,.3,1.05) both;
+  }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(24px) scale(.97); } to { opacity: 1; transform: none; } }
+  .result-card::before, .result-card::after { content: "◈"; position: absolute; color: var(--gold); font-size: 18px; }
+  .result-card::before { top: 10px; left: 12px; } .result-card::after { bottom: 10px; right: 12px; }
+
+  .res-head { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
+  .res-no { font-size: clamp(26px, 7vw, 34px); color: var(--red-deep); letter-spacing: .1em; font-weight: 700; }
+  .badge {
+    font-family: var(--song); font-size: clamp(15px, 4.2vw, 18px);
+    padding: 4px 14px; border-radius: 999px; color: #fff; font-weight: 700;
+    letter-spacing: .15em; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  .badge[data-level="ss"] { background: linear-gradient(135deg, #e6c86a, #b8860b); color: #4a2c18; }
+  .badge[data-level="sj"] { background: linear-gradient(135deg, #d8574a, #9c1f1f); }
+  .badge[data-level="zj"] { background: linear-gradient(135deg, #e8a14c, #c46a1e); }
+  .badge[data-level="zp"] { background: linear-gradient(135deg, #8b9bb0, #5f7188); }
+  .badge[data-level="xx"] { background: linear-gradient(135deg, #3f5a72, #24364a); }
+
+  .res-title { margin-top: 14px; text-align: center; color: #7a5c22; font-size: clamp(15px, 4vw, 17px); letter-spacing: .1em; }
+  .res-title b { color: var(--red); }
+  .brief-line { margin: 10px auto 0; text-align: center; color: #6b5326; font-size: clamp(14px, 3.8vw, 16px); line-height: 1.8; }
+
+  .res-poem {
+    margin: 18px auto 0; text-align: center;
+    font-size: clamp(19px, 5.4vw, 25px); line-height: 2; letter-spacing: .1em; color: #2a1a08;
+    position: relative; padding: 8px 12px;
+  }
+  .res-poem::before { content: "『"; position: absolute; left: -2px; top: -2px; color: rgba(201,162,39,.9); font-size: 24px; }
+  .res-poem::after { content: "』"; position: absolute; right: -2px; bottom: -2px; color: rgba(201,162,39,.9); font-size: 24px; }
+
+  .sec { margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(201,162,39,.55); }
+  .sec-title {
+    text-align: center; font-weight: 700; color: var(--red);
+    font-size: clamp(15px, 4vw, 17px); letter-spacing: .2em; padding-left: .2em;
+    margin-bottom: 8px;
+  }
+  .sec-title::before { content: "· "; } .sec-title::after { content: " ·"; }
+  .sec-body { color: #4a3820; font-size: clamp(15px, 4vw, 16px); line-height: 2; text-align: justify; }
+
+  .fortunes { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; }
+  .f-item {
+    display: flex; flex-direction: column; gap: 2px;
+    background: rgba(201,162,39,.08); border: 1px solid rgba(201,162,39,.35); border-radius: 8px;
+    padding: 7px 9px;
+  }
+  .f-key { font-weight: 700; color: var(--red); font-size: 14px; letter-spacing: .1em; }
+  .f-val { color: #4a3820; font-size: 14px; line-height: 1.6; }
+
+  .empty { text-align: center; color: #e8d9a8; font-size: 15px; padding: 26px 0; letter-spacing: .1em; }
+
+  .back {
+    display: block; margin: 24px auto 0; text-align: center; color: #caa;
+    text-decoration: none; font-size: 14px; letter-spacing: .15em;
+  }
+  .back:hover { color: var(--gold-light); }
+
+  footer { position: relative; z-index: 2; margin-top: 30px; text-align: center; color: #caa; font-size: 12px; line-height: 2; letter-spacing: .05em; }
+</style>
+</head>
+<body>
+
+<div class="temple" aria-hidden="true">
+  <svg viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <pattern id="hui" width="20" height="20" patternUnits="userSpaceOnUse">
+        <rect x="3" y="3" width="14" height="14" fill="none" stroke="#e8cd74" stroke-width="1.3" opacity=".5"/>
+        <rect x="7" y="7" width="6" height="6" fill="none" stroke="#e8cd74" stroke-width="1" opacity=".5"/>
+      </pattern>
+      <linearGradient id="pillar" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#3d0808"/><stop offset=".35" stop-color="#8c1a1a"/><stop offset=".6" stop-color="#a42424"/><stop offset="1" stop-color="#3d0808"/>
+      </linearGradient>
+    </defs>
+    <rect x="0" y="0" width="400" height="34" fill="url(#hui)"/>
+    <rect x="0" y="34" width="400" height="4" fill="#e8cd74" opacity=".55"/>
+    <rect x="0" y="0" width="400" height="54" fill="none" stroke="#e8cd74" stroke-width="2" opacity=".6"/>
+    <rect x="10" y="54" width="16" height="746" fill="url(#pillar)" stroke="#e8cd74" stroke-width="1.2" opacity=".85"/>
+    <rect x="374" y="54" width="16" height="746" fill="url(#pillar)" stroke="#e8cd74" stroke-width="1.2" opacity=".85"/>
+    <rect x="4" y="54" width="28" height="6" fill="#e8cd74" opacity=".7"/>
+    <rect x="368" y="54" width="28" height="6" fill="#e8cd74" opacity=".7"/>
+    <rect x="4" y="794" width="28" height="6" fill="#e8cd74" opacity=".7"/>
+    <rect x="368" y="794" width="28" height="6" fill="#e8cd74" opacity=".7"/>
+    <rect x="0" y="766" width="400" height="34" fill="url(#hui)"/>
+    <g stroke="#e8cd74" fill="none" stroke-width="2" opacity=".7" stroke-linecap="round">
+      <path d="M34 66 C34 52 46 44 56 48 C58 40 70 40 72 48 C82 48 84 58 76 60 C80 68 70 70 66 64"/>
+      <path d="M366 66 C366 52 354 44 344 48 C342 40 330 40 328 48 C318 48 316 58 324 60 C320 68 330 70 334 64"/>
+      <path d="M34 734 C34 748 46 756 56 752 C58 760 70 760 72 752 C82 752 84 742 76 740 C80 732 70 730 66 736"/>
+      <path d="M366 734 C366 748 354 756 344 752 C342 760 330 760 328 752 C318 752 316 742 324 740 C320 732 330 730 334 736"/>
+    </g>
+    <g stroke="#e8cd74" fill="none" stroke-width="1.4" opacity=".14">
+      <path d="M120 300 C120 280 150 268 176 278 C180 258 204 258 208 278 C236 278 240 300 222 304 C228 318 206 320 200 310"/>
+      <path d="M200 300 C200 318 176 326 156 318"/>
+    </g>
+  </svg>
+</div>
+
+<div class="page">
+  <header class="plaque">
+    <h1>签文查询</h1>
+    <div class="sub">吕 祖 灵 签 · 道长查签</div>
+  </header>
+
+  <div class="search">
+    <div class="search-label">输入签号（1 ~ 100）</div>
+    <div class="search-row">
+      <input class="q" id="q" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="3" placeholder="签号" autocomplete="off">
+      <button class="btn-go" id="go">查看</button>
+    </div>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <div class="result" id="result"></div>
+
+  <a class="back" href="index.html">← 返回求签</a>
+  <footer>心诚则灵</footer>
+</div>
+
+<script>
+const DATA = /*__DATA__*/;
+const LEVEL_KEY = { '上上':'ss', '上吉':'sj', '中吉':'zj', '中平':'zp', '下下':'xx' };
+const FORTUNE_KEYS = ['谋望','钱财','婚姻','自身','家宅','开业','迁居','出行','疾病','六甲','行人','诉讼'];
+
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function sec(title, body) {
+  if (!body) return '';
+  return '<div class="sec"><div class="sec-title">' + esc(title) + '</div><div class="sec-body">' + esc(body) + '</div></div>';
+}
+
+function show(n) {
+  n = parseInt(n, 10);
+  const el = document.getElementById('result');
+  if (!n || n < 1 || n > 100) {
+    el.innerHTML = '<div class="empty">请输入 1 ~ 100 的签号</div>';
+    return;
+  }
+  const d = DATA.find(function (x) { return x.id === n; });
+  if (!d) { el.innerHTML = '<div class="empty">未找到该签</div>'; return; }
+
+  const poem = esc(d.poem).replace(/[;；]/g, '<br>');
+  const fortunes = FORTUNE_KEYS.map(function (k) {
+    const v = d.fortunes && d.fortunes[k];
+    return v ? '<div class="f-item"><span class="f-key">' + esc(k) + '</span><span class="f-val">' + esc(v) + '</span></div>' : '';
+  }).join('');
+
+  el.innerHTML =
+    '<div class="result-card">' +
+      '<div class="res-head">' +
+        '<span class="res-no">第 ' + d.id + ' 签</span>' +
+        '<span class="badge" data-level="' + (LEVEL_KEY[d.level] || 'zp') + '">' + esc(d.level) + '</span>' +
+      '</div>' +
+      '<div class="res-title">典故 · <b>' + esc(d.title) + '</b></div>' +
+      '<div class="brief-line">' + esc(d.brief) + '</div>' +
+      '<div class="res-poem">' + poem + '</div>' +
+      sec('解签', d.jie) +
+      sec('诗曰', d.shi) +
+      sec('白话解诗', d.jieshi) +
+      '<div class="sec"><div class="sec-title">十二项运程</div><div class="fortunes">' + fortunes + '</div></div>' +
+    '</div>';
+  window.scrollTo(0, 0);
+}
+
+function submit() {
+  show(document.getElementById('q').value);
+}
+
+document.getElementById('go').addEventListener('click', submit);
+document.getElementById('q').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') { submit(); }
+});
+
+// 1~100 快捷网格
+(function () {
+  const g = document.getElementById('grid');
+  let html = '';
+  for (let i = 1; i <= 100; i++) {
+    html += '<button class="num-btn" data-n="' + i + '">' + i + '</button>';
+  }
+  g.innerHTML = html;
+  g.addEventListener('click', function (e) {
+    const b = e.target.closest('.num-btn');
+    if (!b) return;
+    document.getElementById('q').value = b.getAttribute('data-n');
+    show(b.getAttribute('data-n'));
+  });
+})();
+
+// 深链：?q=5 或 #5
+(function () {
+  const m = location.search.match(/[?&]q=(\d+)/) || location.hash.match(/^#(\d+)$/);
+  if (m) {
+    document.getElementById('q').value = m[1];
+    show(m[1]);
+  }
+})();
+</script>
+</body></html>

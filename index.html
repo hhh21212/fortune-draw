@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="description" content="三弘道长求签 · 吕祖灵签，雕梁画栋，摇签解签">
+<meta name="theme-color" content="#8c1a1a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="三弘道长求签">
+<meta name="application-name" content="三弘道长求签">
+<title>三弘道长求签 · 吕祖灵签</title>
+<style>
+  :root {
+    --red: #8c1a1a;
+    --red-deep: #570e0e;
+    --red-black: #2a0505;
+    --gold: #c9a227;
+    --gold-light: #e8cd74;
+    --gold-pale: #f3e2b0;
+    --lacquer: #2a1108;
+    --lacquer-deep: #180a04;
+    --jade: #3f8f72;
+    --bamboo-hi: #f0e0b0;
+    --bamboo-lo: #b99a4e;
+    --ink-light: #f6ecd2;
+    --kai: "STKaiti", "KaiTi", "楷体", "Kaiti SC", "FangSong", "STFangsong", serif;
+    --song: "Songti SC", "STSong", "SimSun", "宋体", serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html {
+    height: 100%;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    height: 100%;
+    font-family: var(--kai);
+    color: var(--ink-light);
+    background-color: #3d0808;
+    min-height: 100vh;
+    min-height: 100svh;
+    overflow-x: hidden;
+    position: relative;
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    overscroll-behavior-y: contain;
+  }
+
+  /* ============ 雕梁画栋 背景装饰 ============ */
+  .temple {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(1200px 700px at 50% -10%, rgba(232,205,116,.10), transparent 60%),
+      radial-gradient(900px 600px at 50% 115%, rgba(0,0,0,.5), transparent 60%),
+      linear-gradient(180deg, #6b1212 0%, #8c1a1a 30%, #5f0f0f 70%, #3d0808 100%);
+  }
+  .temple svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  /* ============ 双屏 ============ */
+  .screen {
+    position: relative; z-index: 2;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding:
+      calc(16px + env(safe-area-inset-top))
+      16px
+      calc(40px + env(safe-area-inset-bottom));
+  }
+  .screen.active { display: flex; animation: screenIn .55s ease both; }
+  .screen.fade-out { opacity: 0; transition: opacity .3s ease; }
+  @keyframes screenIn {
+    from { opacity: 0; transform: translateY(26px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* ============ 牌匾 ============ */
+  .plaque {
+    margin-top: 30px; text-align: center;
+    padding: 16px 30px 14px;
+    background: linear-gradient(180deg, #3a1a0a, #241006 55%, #3a1a0a);
+    border: 2px solid var(--gold);
+    outline: 1px solid #120602;
+    box-shadow: 0 6px 20px rgba(0,0,0,.5), inset 0 0 0 2px #120602, inset 0 0 18px rgba(0,0,0,.55);
+    border-radius: 6px;
+    position: relative;
+  }
+  .plaque h1 {
+    font-size: clamp(28px, 7.5vw, 42px);
+    letter-spacing: .3em; padding-left: .3em;
+    color: var(--gold-light);
+    text-shadow: 0 0 14px rgba(232,205,116,.6), 0 2px 2px #160804;
+    font-weight: 700;
+  }
+  .plaque .sub {
+    margin-top: 5px; font-size: clamp(12px, 3.2vw, 15px);
+    letter-spacing: .45em; padding-left: .45em;
+    color: #d8c08a;
+  }
+  .plaque::before, .plaque::after {
+    content: "❖"; position: absolute; top: 50%; transform: translateY(-50%);
+    color: var(--gold); font-size: 13px;
+  }
+  .plaque::before { left: 10px; }
+  .plaque::after { right: 10px; }
+
+  /* ============ 求签屏：签筒场景 ============ */
+  .scene {
+    position: relative;
+    width: min(88vw, 300px);
+    height: 400px;
+    margin-top: 18px;
+    cursor: pointer;
+    -webkit-user-select: none; user-select: none;
+  }
+  .scene:active { cursor: grabbing; }
+
+  .shaker {
+    position: absolute; inset: 0;
+    transform-origin: 50% 92%;
+    will-change: transform;
+  }
+
+  /* 竹签片 */
+  .stick {
+    position: absolute; bottom: 44px; width: 20px;
+    z-index: 1; transform-origin: 50% 100%;
+  }
+  .stick.s-m { left: 50%; margin-left: -10px; height: 180px; }
+  .stick.s-l { left: 50%; margin-left: -36px; height: 158px; transform: rotate(-7deg); }
+  .stick.s-r { left: 50%; margin-left: 16px; height: 166px; transform: rotate(7deg); }
+
+  .stick-inner {
+    position: relative; width: 100%; height: 100%;
+    border-radius: 9px 9px 4px 4px;
+    background:
+      repeating-linear-gradient(180deg, transparent 0 27px, rgba(130,95,42,.5) 27px 30px),
+      linear-gradient(90deg, #c2a055 0%, #e6d29b 30%, #f2e4b8 50%, #e0c98a 70%, #b08f44 100%);
+    box-shadow: inset 0 0 0 1px rgba(90,60,20,.3), inset -2px 0 3px rgba(90,60,20,.2), 0 3px 6px rgba(0,0,0,.4);
+    transform-origin: 50% 100%;
+  }
+  .stick-inner::after {
+    content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 12px; height: 7px; border-radius: 6px 6px 2px 2px;
+    background: #caa45c; box-shadow: inset 0 1px 1px rgba(255,255,255,.4);
+  }
+
+  /* 中签抬起 */
+  .stick.rising { z-index: 4; }
+  .stick.rising .stick-inner { animation: riseUp .62s cubic-bezier(.2,.9,.3,1.08) forwards; }
+  @keyframes riseUp {
+    0% { transform: translateY(0); }
+    60% { transform: translateY(-74px); }
+    100% { transform: translateY(-66px); }
+  }
+
+  /* 摇签：签筒晃动 */
+  .shaker.shaking { animation: tubeShake 3.5s cubic-bezier(.45,.05,.5,.95) both; }
+  @keyframes tubeShake {
+    0%   { transform: rotate(0deg); }
+    7%   { transform: rotate(-4deg); }
+    14%  { transform: rotate(4deg); }
+    21%  { transform: rotate(-3.5deg); }
+    28%  { transform: rotate(3.5deg); }
+    35%  { transform: rotate(-3deg); }
+    42%  { transform: rotate(3deg); }
+    50%  { transform: rotate(-2.4deg); }
+    58%  { transform: rotate(2.4deg); }
+    66%  { transform: rotate(-1.8deg); }
+    74%  { transform: rotate(1.8deg); }
+    82%  { transform: rotate(-5.5deg); }   /* 最后一次较大晃动 */
+    91%  { transform: rotate(4.5deg); }
+    100% { transform: rotate(0deg); }
+  }
+
+  /* 竹签片碰撞晃动 */
+  .stick-inner.rattling { animation: rattle .16s ease-in-out infinite; }
+  .stick.s-l .stick-inner.rattling { animation-delay: .05s; }
+  .stick.s-r .stick-inner.rattling { animation-delay: .1s; }
+  @keyframes rattle {
+    0%,100% { transform: rotate(-3.5deg); }
+    50% { transform: rotate(3.5deg); }
+  }
+
+  /* 中签上的红签号 */
+  .seal {
+    position: absolute; top: 12px; left: 50%;
+    transform: translateX(-50%) scale(.2);
+    width: 40px; height: 40px; border-radius: 50%;
+    background: radial-gradient(circle at 34% 28%, #e06452, #a52a1e 74%);
+    border: 2px solid var(--gold-light);
+    color: #fff6e2; font-family: var(--song);
+    font-size: 19px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,.5), 0 0 14px rgba(232,205,116,.7), inset 0 1px 1px rgba(255,255,255,.5);
+    opacity: 0; transition: opacity .32s ease, transform .32s ease;
+    z-index: 2;
+  }
+  .stick.rising .seal { opacity: 1; transform: translateX(-50%) scale(1); }
+
+  /* ============ 签筒（雕花） ============ */
+  .tube {
+    position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; height: 150px; z-index: 2;
+    border-radius: 16px 16px 34px 34px;
+    background: linear-gradient(180deg, #4a2010 0%, #2a1108 34%, #180a04 100%);
+    border: 2px solid var(--gold);
+    box-shadow: 0 14px 30px rgba(0,0,0,.55), inset 0 0 22px rgba(0,0,0,.65), inset 0 2px 2px rgba(232,205,116,.12);
+    overflow: hidden;
+  }
+  .tube svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .tube .label {
+    position: absolute; left: 0; right: 0; bottom: 12px; text-align: center;
+    color: var(--gold-light); font-size: clamp(16px, 4.6vw, 20px);
+    letter-spacing: .35em; padding-left: .35em;
+    text-shadow: 0 0 10px rgba(232,205,116,.5), 0 2px 2px #120602;
+  }
+
+  .hint {
+    margin-top: 20px; text-align: center;
+    color: #e8d9a8; font-size: clamp(13px, 3.5vw, 15px);
+    letter-spacing: .12em; line-height: 1.9;
+  }
+  .hint b { color: var(--gold-light); }
+  .hint .pulse { display: inline-block; animation: hintPulse 1.6s ease-in-out infinite; }
+  @keyframes hintPulse { 0%,100% { opacity: .6; } 50% { opacity: 1; } }
+
+  /* ============ 结果屏 ============ */
+  .result-card {
+    margin-top: 34px;
+    width: min(94vw, 460px);
+    padding: 30px 28px 26px;
+    background: linear-gradient(180deg, #fbf3df 0%, #f3e6c8 100%);
+    color: #3a2a12;
+    border: 3px solid var(--gold);
+    outline: 2px solid #7a5c22;
+    border-radius: 12px;
+    box-shadow: 0 16px 40px rgba(0,0,0,.55), inset 0 0 0 3px #fbf3df, inset 0 0 0 4px rgba(201,162,39,.5);
+    position: relative;
+    animation: cardIn .6s cubic-bezier(.2,.9,.3,1.1) both;
+  }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(30px) scale(.96); } to { opacity: 1; transform: none; } }
+  .result-card::before, .result-card::after {
+    content: "◈"; position: absolute; color: var(--gold); font-size: 18px;
+  }
+  .result-card::before { top: 10px; left: 12px; }
+  .result-card::after { bottom: 10px; right: 12px; }
+
+  .res-head { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
+  .res-no { font-size: clamp(26px, 7vw, 34px); color: var(--red-deep); letter-spacing: .1em; font-weight: 700; }
+  .badge {
+    font-family: var(--song); font-size: clamp(15px, 4.2vw, 18px);
+    padding: 4px 14px; border-radius: 999px; color: #fff; font-weight: 700;
+    letter-spacing: .15em; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  .badge[data-level="ss"] { background: linear-gradient(135deg, #e6c86a, #b8860b); color: #4a2c18; }
+  .badge[data-level="sj"] { background: linear-gradient(135deg, #d8574a, #9c1f1f); }
+  .badge[data-level="zj"] { background: linear-gradient(135deg, #e8a14c, #c46a1e); }
+  .badge[data-level="zp"] { background: linear-gradient(135deg, #8b9bb0, #5f7188); }
+  .badge[data-level="xx"] { background: linear-gradient(135deg, #3f5a72, #24364a); }
+
+  .res-title { margin-top: 16px; text-align: center; color: #7a5c22; font-size: clamp(15px, 4vw, 17px); letter-spacing: .1em; }
+  .res-title b { color: var(--red); }
+
+  .res-poem {
+    margin: 20px auto 0; text-align: center;
+    font-size: clamp(19px, 5.4vw, 26px);
+    line-height: 2; letter-spacing: .1em; color: #2a1a08;
+    position: relative; padding: 8px 12px;
+  }
+  .res-poem::before { content: "『"; position: absolute; left: -2px; top: -2px; color: rgba(201,162,39,.9); font-size: 24px; }
+  .res-poem::after { content: "』"; position: absolute; right: -2px; bottom: -2px; color: rgba(201,162,39,.9); font-size: 24px; }
+
+  .res-divider { margin: 20px auto 0; width: 70%; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+
+  .res-brief { margin: 16px auto 4px; text-align: center; color: #6b5326; font-size: clamp(14px, 3.8vw, 16px); line-height: 1.9; }
+  .res-brief::before { content: "解："; color: var(--red); font-weight: 700; }
+
+  .btn-again {
+    margin-top: 24px; padding: 12px 40px;
+    font-family: var(--kai); font-size: clamp(17px, 4.6vw, 20px);
+    letter-spacing: .3em; padding-left: calc(.3em + 12px);
+    color: #fff6e2;
+    background: linear-gradient(180deg, #b82b1e, #8c1a1a 45%, #570e0e 100%);
+    border: 2px solid var(--gold); border-radius: 40px; cursor: pointer;
+    box-shadow: 0 6px 16px rgba(0,0,0,.5), inset 0 1px 1px rgba(255,255,255,.3), inset 0 -4px 8px rgba(0,0,0,.3);
+    text-shadow: 0 1px 2px rgba(0,0,0,.4);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-again:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0,0,0,.55), 0 0 16px rgba(201,162,39,.5); }
+  .btn-again:active { transform: scale(.97); }
+
+  footer {
+    position: relative; z-index: 2; margin-top: 34px;
+    text-align: center; color: #caa; font-size: 12px; line-height: 2; letter-spacing: .05em;
+  }
+
+  @media (max-width: 360px) {
+    .scene { height: 360px; }
+    .stick.s-m { height: 160px; }
+    .stick.s-l { height: 140px; }
+    .stick.s-r { height: 146px; }
+  }
+
+  /* 短屏（如 iPhone SE / 小屏安卓）：收紧，保证一屏看全签筒 */
+  @media (max-height: 700px) {
+    .plaque { margin-top: 10px; padding: 11px 26px 9px; }
+    .scene { height: 320px; margin-top: 10px; }
+    .stick.s-m { height: 150px; }
+    .stick.s-l { height: 132px; }
+    .stick.s-r { height: 138px; }
+    .hint { margin-top: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 雕梁画栋 背景 -->
+<div class="temple" aria-hidden="true">
+  <svg viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <pattern id="hui" width="20" height="20" patternUnits="userSpaceOnUse">
+        <rect x="3" y="3" width="14" height="14" fill="none" stroke="#e8cd74" stroke-width="1.3" opacity=".5"/>
+        <rect x="7" y="7" width="6" height="6" fill="none" stroke="#e8cd74" stroke-width="1" opacity=".5"/>
+      </pattern>
+      <linearGradient id="pillar" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#3d0808"/><stop offset=".35" stop-color="#8c1a1a"/><stop offset=".6" stop-color="#a42424"/><stop offset="1" stop-color="#3d0808"/>
+      </linearGradient>
+    </defs>
+
+    <!-- 顶部藻井 / 檐枋 -->
+    <rect x="0" y="0" width="400" height="34" fill="url(#hui)"/>
+    <rect x="0" y="34" width="400" height="4" fill="#e8cd74" opacity=".55"/>
+    <rect x="0" y="0" width="400" height="54" fill="none" stroke="#e8cd74" stroke-width="2" opacity=".6"/>
+
+    <!-- 左右朱红柱 -->
+    <rect x="10" y="54" width="16" height="746" fill="url(#pillar)" stroke="#e8cd74" stroke-width="1.2" opacity=".85"/>
+    <rect x="374" y="54" width="16" height="746" fill="url(#pillar)" stroke="#e8cd74" stroke-width="1.2" opacity=".85"/>
+    <rect x="4" y="54" width="28" height="6" fill="#e8cd74" opacity=".7"/>
+    <rect x="368" y="54" width="28" height="6" fill="#e8cd74" opacity=".7"/>
+    <rect x="4" y="794" width="28" height="6" fill="#e8cd74" opacity=".7"/>
+    <rect x="368" y="794" width="28" height="6" fill="#e8cd74" opacity=".7"/>
+
+    <!-- 底部回纹 -->
+    <rect x="0" y="766" width="400" height="34" fill="url(#hui)"/>
+
+    <!-- 云纹 四角 -->
+    <g stroke="#e8cd74" fill="none" stroke-width="2" opacity=".7" stroke-linecap="round">
+      <path d="M34 66 C34 52 46 44 56 48 C58 40 70 40 72 48 C82 48 84 58 76 60 C80 68 70 70 66 64"/>
+      <path d="M366 66 C366 52 354 44 344 48 C342 40 330 40 328 48 C318 48 316 58 324 60 C320 68 330 70 334 64"/>
+      <path d="M34 734 C34 748 46 756 56 752 C58 760 70 760 72 752 C82 752 84 742 76 740 C80 732 70 730 66 736"/>
+      <path d="M366 734 C366 748 354 756 344 752 C342 760 330 760 328 752 C318 752 316 742 324 740 C320 732 330 730 334 736"/>
+    </g>
+
+    <!-- 中央云纹暗纹 -->
+    <g stroke="#e8cd74" fill="none" stroke-width="1.4" opacity=".14">
+      <path d="M120 300 C120 280 150 268 176 278 C180 258 204 258 208 278 C236 278 240 300 222 304 C228 318 206 320 200 310"/>
+      <path d="M200 300 C200 318 176 326 156 318"/>
+    </g>
+  </svg>
+</div>
+
+<!-- ====== 屏一：求签 ====== -->
+<section class="screen active" id="screen1">
+
+  <header class="plaque">
+    <h1>三弘道长求签</h1>
+    <div class="sub">吕 祖 灵 签 · 摇 签 问 卜</div>
+  </header>
+
+  <div class="scene" id="scene" title="点按签筒摇签">
+    <div class="shaker" id="shaker">
+      <div class="stick s-l"><div class="stick-inner"></div></div>
+      <div class="stick s-m" id="stickMid"><div class="stick-inner" id="stickInner"><span class="seal" id="riseSeal"></span></div></div>
+      <div class="stick s-r"><div class="stick-inner"></div></div>
+      <div class="tube" id="tube">
+        <svg viewBox="0 0 300 150" preserveAspectRatio="none">
+          <defs>
+            <pattern id="tubeHui" width="18" height="18" patternUnits="userSpaceOnUse">
+              <rect x="3" y="3" width="12" height="12" fill="none" stroke="#e8cd74" stroke-width="1.2" opacity=".55"/>
+              <rect x="6.5" y="6.5" width="5" height="5" fill="none" stroke="#e8cd74" stroke-width=".9" opacity=".55"/>
+            </pattern>
+          </defs>
+          <rect x="6" y="18" width="288" height="30" fill="url(#tubeHui)"/>
+          <line x1="6" y1="16" x2="294" y2="16" stroke="#e8cd74" stroke-width="2" opacity=".7"/>
+          <line x1="6" y1="50" x2="294" y2="50" stroke="#e8cd74" stroke-width="2" opacity=".7"/>
+          <!-- 如意云纹 徽记 -->
+          <g transform="translate(150,96)" stroke="#e8cd74" fill="none" stroke-width="2" opacity=".75" stroke-linecap="round">
+            <path d="M-34 0 C-34 -16 -16 -22 -6 -14 C-4 -24 8 -24 10 -14 C20 -16 22 -2 12 2 C16 10 4 12 0 6 Z" fill="rgba(232,205,116,.12)"/>
+            <circle cx="0" cy="-2" r="4" fill="#e8cd74" opacity=".8"/>
+          </g>
+        </svg>
+        <span class="label">吕 祖 灵 签</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="hint">诚心默念，心中想着所问之事<br>然后 <b>点按签筒</b>，摇出一签 <span class="pulse">▼</span></p>
+
+</section>
+
+<!-- ====== 屏二：签文 ====== -->
+<section class="screen" id="screen2">
+  <div class="result-card">
+    <div class="res-head">
+      <span class="res-no" id="resNo"></span>
+      <span class="badge" id="resBadge"></span>
+    </div>
+    <div class="res-title" id="resTitle"></div>
+    <div class="res-poem" id="resPoem"></div>
+    <div class="res-divider"></div>
+    <div class="res-brief" id="resBrief"></div>
+    <div style="text-align:center">
+      <button class="btn-again" id="againBtn">再求一签</button>
+    </div>
+  </div>
+  <footer>心诚则灵</footer>
+</section>
+
+<script>
+const DATA = [{"id":1,"title":"王母祝寿","poem":"蓬莱东阁玉桃香，顺水行舟仙赐方;宜男正好图全计，不必他方卜地长。","level":"上上","brief":"吉庆先兆，正处好运，戒骄戒躁守稳，福禄自来。"},{"id":2,"title":"潜龙变化","poem":"潜藏自有光明日，守耐无如待丙丁;龙虎相争生定数，春风一转渐飞惊。","level":"中吉","brief":"待时而动，时机未至莫强求，蓄力则利。"},{"id":3,"title":"唐明皇游月殿","poem":"明月当三五，天地自无私;一阳来已复，得意在秋时。","level":"中吉","brief":"诸事无碍，秋时更佳，顺其自然即可。"},{"id":4,"title":"唐三藏取经","poem":"正大有鬼神之助，吉祥成忠厚之报;不怕邪魔小崇，只看秋收冬藏。","level":"中平","brief":"途中险阻有救应，坚守初心终能化解。"},{"id":5,"title":"亢龙得水","poem":"柔顺而静，坤之六爻皆吉。阴盛于阳，不怕亢龙之悔。若此消息，只待羊兔相宜。","level":"中吉","brief":"小心行事则吉，切忌得意忘形。"},{"id":6,"title":"刘备取西川","poem":"如争如战，长子克家，从吉而贞。当知天从人愿，不必二二三三。","level":"上吉","brief":"求谋顺利，男子尤利，稳扎稳打可成。"},{"id":7,"title":"盘古初开","poem":"临物易与，天地人合;一到春风，百祥骈集。","level":"中平","brief":"初开之际半途易阻，须耐心坚持。"},{"id":8,"title":"文叙中三元","poem":"喜喜喜，春凤桃李。鹊噪檐前，锦衣归里。酉戍相看，天佑好子。","level":"上上","brief":"凡事大吉，功名高中，宜乘势而为。"},{"id":9,"title":"岳飞出世","poem":"鲲化为鹏一任飞，长安路上好光辉;阴谋阴卜皆如许，顺水行舟定好归。","level":"中吉","brief":"先凶后吉，遇难有贵人扶助。"},{"id":10,"title":"古城相会","poem":"问仙须要酬天地，百事如心定有利;果能春秋两处好，龙虎呈祥，风云际会。","level":"上吉","brief":"失而复得，终得团圆，守候有佳音。"},{"id":11,"title":"合兵破曹","poem":"一个兔儿一个鸡，等全无不合人思;有朝遇着东风力，且看天公造化机。","level":"上上","brief":"众志成城，顺风得利，大吉之象。"},{"id":12,"title":"刘阮遇仙","poem":"十日坐，一日行;矶头有水，不碍利前程。问到如何境，刘阮天台不误人。","level":"上上","brief":"宜远行求谋，大吉大利，或有奇遇。"},{"id":13,"title":"宝剑出匣","poem":"有剑开神路，何妖敢犯神;君子道长，小人道消。月明终有望，河上任逍遥。","level":"中吉","brief":"先难后吉，才华当显，锋芒毕露自无忧。"},{"id":14,"title":"牛皋战兀术","poem":"一虎出山，一龙飞天。天缘人缘，上国收贤。生育之美，造化两全。","level":"下下","brief":"多有不祥，宜谨慎退守，勿强出头。"},{"id":15,"title":"仙姬相会","poem":"月到天心人有望，牛郎巧合属天成;不须辗转求良偶，天喜从人命自荣。","level":"上吉","brief":"平安吉兆，喜事相逢，静待佳音。"},{"id":16,"title":"王勃中状元","poem":"时来风送滕王阁，运至何忧跨仙鹤。甲乙两运天云梯，也知桂香味早卓。","level":"上上","brief":"事事如意，才华得展，功名成就。"},{"id":17,"title":"张飞喝断长板桥","poem":"一旦雷声震，四方皆有庆;转吉又增祥，壬癸子午定。","level":"上吉","brief":"转危为安，吉气渐增，勇往直前。"},{"id":18,"title":"孔明借东风","poem":"十日滩头生，一日过九滩。东风须着力，人事自完全。","level":"中平","brief":"事须借助外力，亦要提防小人。"},{"id":19,"title":"崔梦熊得第","poem":"喜得秋风万事足，一举成中天下福;风凰五彩利飞行，只看子午时日卜。","level":"上上","brief":"名利双收，大吉大利，进取有成。"},{"id":20,"title":"王道人炼丹","poem":"人转丹成白日升，神仙有数利人营;一朝走马龙行会，此是荣华一美因。","level":"中平","brief":"事难成就，须持之以恒，勿半途而废。"},{"id":21,"title":"永乐王登基","poem":"吉人天相，子丑相当;西北有荣，风行水上。","level":"上吉","brief":"先难后易，终得亨通，守候自见光明。"},{"id":22,"title":"顺治过江","poem":"上上等，利有攸往。一日遇合，鼠牛相放。好好机会，名登天榜。","level":"上上","brief":"上上之签，凡事皆吉，顺水行舟。"},{"id":23,"title":"煮酒论英雄","poem":"海上一龙飞，春风得意回;从此欣荣遇，只待一壬来。","level":"中平","brief":"险中有救，藏锋蓄势，静观其变。"},{"id":24,"title":"陈万年再世姻缘","poem":"说到龙蛇马又来，看看无不遂心怀;前生俱是有缘份，及到今时运已该。","level":"中吉","brief":"先凶后吉，姻缘再续，终得圆满。"},{"id":25,"title":"冯诚修告老","poem":"猪鼠相合，卯酉相同;一船满载，载载不空，得心应手;只在三四五成功。","level":"中平","brief":"知止而退方为妙，不宜强进。"},{"id":26,"title":"梁灏大器晚成","poem":"一天喜气一门吉，一人有庆皆受益。一箭中红心，功名成遂转，祥风生四壁，门庭光奕奕。","level":"上吉","brief":"大器晚成，万事如意，迟来者贵。"},{"id":27,"title":"卞和进宝","poem":"凤翥丹山报晓时，人生得意是奇奇;看来自有探龙宝，日月光辉申与鸡。","level":"中吉","brief":"先受委屈后得赏识，坚守终有回报。"},{"id":28,"title":"赵子龙佐刘备","poem":"前生原是此家人，今世相逢定有因;龙虎呈祥遂天子，五三六二是奇期。","level":"上吉","brief":"功名富贵有神明护助，忠心必得善果。"},{"id":29,"title":"孙真人行医","poem":"猴儿来，兔儿去，龙呤虎啸;乃是收成佳遇，不须求际。","level":"中吉","brief":"先阻后通，济世之心终有际遇。"},{"id":30,"title":"湘子得道","poem":"干三爻，渐三爻;一时遇合，鹤鸣九皋。","level":"中平","brief":"财路可通而名未显，安分守己。"},{"id":31,"title":"姜维辅蜀","poem":"水上顺风吹，高才得意挥;学成文武艺，自有好栽培。","level":"中平","brief":"凡事小心谨慎，方保无虞。"},{"id":32,"title":"郭嘉遗计定辽东","poem":"荣华贵，富贵来;天地生成，多吉少悔。三九遂心怀，虔许善功福自来。","level":"上吉","brief":"多吉少悔，谋略得当，事半功倍。"},{"id":33,"title":"梅花开二度","poem":"梅占花魁及第巍，天生福禄禄同辉;问到终身何所就，三七之内是荣华。","level":"中吉","brief":"凡事力忍则吉，柳暗花明又一村。"},{"id":34,"title":"龙马负图","poem":"自从河洛周天数，演到出门交有功;一生际遇须龙马，不用踌躇自合行。","level":"上上","brief":"大吉大利，祥瑞临门，天赐良机。"},{"id":35,"title":"白马跳檀溪","poem":"阴德不是非凡事，积善之家度有余;厄去福来天凑巧，龙飞虎跃一鸡啼。","level":"中吉","brief":"险处逢生，遇难呈祥，吉人自有天相。"},{"id":36,"title":"张九龄出世","poem":"芹香鹿鸣，不远不近，二五之内，自然有幸，天喜文昌照命。","level":"上上","brief":"大吉之兆，英才出世，前程似锦。"},{"id":37,"title":"大舜耕田","poem":"黄金自重，人天雨映;春花秋果，何悔何吝。","level":"上吉","brief":"勤耕自有收获，终吉，厚德载物。"},{"id":38,"title":"鲤鱼化龙","poem":"时行运遂不须愁，一到桃花皆自由;果然渊内龙飞跃，脱俗超化始出头。","level":"上上","brief":"一跃龙门，事事大吉，身价倍增。"},{"id":39,"title":"三顾草芦","poem":"鞭策长安路，天仙第一班。已及时，春风桃李姓名奇。一枝独占梅花上，次第春风到草芦;三十六宫春，上国定观光。","level":"上上","brief":"诚心所致，得遇明主，凡事大吉。"},{"id":40,"title":"桃园结义","poem":"富贵功名各有期，龙虎相逢鸡犬宜;果煞采获仙人手，自是金麟上玉时。","level":"上上","brief":"同心协力，凡事皆吉，义气可成事。"},{"id":41,"title":"马超追曹","poem":"圆又缺，缺又圆;连又断，断又连;遇渡桥，舟在前;也须慎言，方得周全。","level":"中平","brief":"中平之运，危中有救，量力而行。"},{"id":42,"title":"赤壁鏖兵","poem":"只说有愁烦，事到其中兴不阑;逢午方可良，不必乱张惶。","level":"上吉","brief":"守耐则大吉，待时而发，一战功成。"},{"id":43,"title":"刘备智取荆州","poem":"天有时，地有时，人尚少期;要得好时，也看三六九期，忧转嘻嘻。","level":"中平","brief":"平常之运，无碍无失，安分为上。"},{"id":44,"title":"佳人隔帐纱","poem":"莫孤疑，事在可疑。有可疑，不疾不徐，自有出头日子，当看金花一二枝。","level":"中吉","brief":"先难后易，好事多磨，终能如愿。"},{"id":45,"title":"李龙寻妻","poem":"天时人事，正是好佳期，又恐跷蹊;但看双入卯金宜，只待十八子一提携。","level":"上吉","brief":"吉祥之象，寻有所获，失而复得。"},{"id":46,"title":"蔡中兴修建洛阳桥","poem":"桥已断，路不通。若要通时，也候三五之中;许下善功息不穷。","level":"中吉","brief":"中吉之兆，善举得报，功在长远。"},{"id":47,"title":"曹洪失潼关","poem":"已成了，又难保，只待舟济顺风行跑;每事多烦恼，虔心神前修省长安保。","level":"中吉","brief":"以静制动为吉，勿躁进。"},{"id":48,"title":"陈万年不第","poem":"一枝已报晓，恐难得，时尚早;有个成就之时，须向神前恳告。","level":"下下","brief":"凡事艰难，宜安守待时，勿强求。"},{"id":49,"title":"陶渊明归隐","poem":"墙头草，篱下花，山穷水尽，未必繁华。若要繁华，也要归家，方可如心得奢。","level":"中平","brief":"先难后易，宜退而自守，静待时机。"},{"id":50,"title":"崔莺小姐","poem":"一声莺报上林春，恐是虚声，未必峥嵘;若要争荣，还候丙丁。","level":"中吉","brief":"先凶后吉，波折中得贵人相助，终成良缘。"},{"id":51,"title":"孙膑被害","poem":"镜破月缺，孙山保得;若要安康，酬神免业。","level":"下下","brief":"艰辛之极，须隐忍待时，切莫轻举妄动。"},{"id":52,"title":"仁贵父子相会","poem":"虎坐中堂，鸡太相闹;天不如人求，反增多少笑。安而不危，菊花天到。","level":"下下","brief":"大凶之象，幸有神助，宜修身祈福。"},{"id":53,"title":"桃花送药","poem":"一枝好花，风雨未到;只待清明香可味，顺水过渡。","level":"中吉","brief":"险中有救，逢凶化吉，有贵人送福。"},{"id":54,"title":"刘备借荆州","poem":"一半就，一半不就，惹得争斗。取之不合，治之宜早;吉祥方保，也要慢寻讨。","level":"中吉","brief":"中吉之运，借力可为，但要守信。"},{"id":55,"title":"王守仁归隐","poem":"月在天心人在船，名已将得，利已将偿，何不耐烦，不久起床，也要斟详。","level":"上吉","brief":"见机而作则大吉，进退有度。"},{"id":56,"title":"袁有信卖柴","poem":"皇皇典，喜喜贲，天衢平坦;只待小人得志，休得动风，自然既济。","level":"中吉","brief":"守分安命则吉，勤劳终有回报。"},{"id":57,"title":"金星戏窦儿","poem":"乐以忘忧，也要踌躇。事未必月在楼头，那得要休要休，可向金木人儿一构。","level":"中吉","brief":"谦和忍耐则吉，莫争一时之气。"},{"id":58,"title":"永乐王定番邦","poem":"可罢即罢，不须斩尽杀绝，事到无可奈何;也要守旧安歇，力保无失可得，三七可决。","level":"中吉","brief":"中吉之兆，稳中求进，可定大局。"},{"id":59,"title":"孙权坐镇东吴","poem":"去的去，来的来，东南一方。自迩遂依，切莫双疑猜。","level":"上上","brief":"大吉大利，坐镇一方，稳如磐石。"},{"id":60,"title":"武侯伐魏","poem":"苦而甘，甘而甘，一子一午。送喜不送忧，也要自裁生。","level":"中平","brief":"平平之运，劳而无功，宜养精蓄锐。"},{"id":61,"title":"平贵鸿雁传书","poem":"鸿飞天外，舟动无风;人有月明中，自有喜相逢。","level":"上吉","brief":"先凶后吉，音信传喜，万事转好。"},{"id":62,"title":"文昌三圣","poem":"吉吉吉，益益益，不必多急，自有文章东壁。只在初三十一，方可必，方可必。","level":"上吉","brief":"吉星拱照，文运亨通，学业功名有成。"},{"id":63,"title":"白帝城托孤","poem":"龙已飞，虎已归，笙歌已歇;兴而不久，万事如灰。","level":"下下","brief":"万事如灰，不吉之兆，宜低调自省。"},{"id":64,"title":"汉玉路逢拐骗","poem":"生之时多乐，半路上下不相逢;只看无妄之卦，方可悔吝分明。","level":"下下","brief":"凶多吉少，须提防欺诈，慎守财物。"},{"id":65,"title":"杏元和番","poem":"一天星斗灿辉煌，风雨未光;起而不扬，也要两三番。","level":"中吉","brief":"凶里藏吉，逆境中亦有转机。"},{"id":66,"title":"姜子牙卖卦","poem":"得失皆天定，忧喜总归命;知天知命，守之为幸。","level":"中吉","brief":"安分守己乃吉，静待时机降临。"},{"id":67,"title":"张飞战张郃","poem":"一跌复一跌，只恐卤莽灭裂;果能惜得寸金，也要调摄。","level":"上吉","brief":"和气致祥，以和为贵，转凶为吉。"},{"id":68,"title":"刘禅登位","poem":"一门天赐平安福，只恐小人不理。防犬防牛，应取不取;只在三旬里，也有三分喜。","level":"中平","brief":"位高须防小人，谨慎自守。"},{"id":69,"title":"伍子胥走难","poem":"防口甚于防川，不当顽顽;急水莫开船，也要黄昏，乃命得长。若知消息，方要周旋停当，当在二七三上。","level":"中平","brief":"提防小人，忍辱负重，谨慎行事。"},{"id":70,"title":"海瑞中进士","poem":"锦衣万里，劳劳而后喜，一朝可望生成;也是文昌照汝，定是佳人贵子。","level":"上上","brief":"凡事大吉，刚正得志，前程光明。"},{"id":71,"title":"黄巢归天","poem":"黑云迷径人难走，桥断风吹舟又危;莫思徘徊，且去自思维。","level":"下下","brief":"凡事不吉，宜收心敛迹，静待时过。"},{"id":72,"title":"韩信问路斩樵夫","poem":"白日雨如注，行人已自栖，闻道天衢泰;还有不宁居，何必向前进，危且殆乎?","level":"下下","brief":"不吉之兆，须防人心险恶，慎言慎行。"},{"id":73,"title":"王道人收妖","poem":"鬼迷神不佑，须求天神救;立善行功成，好事方成就;三接其画，多许诚求。","level":"中吉","brief":"慎言则吉，口舌是非宜远避。"},{"id":74,"title":"仁贵投军","poem":"猛虎噬人，恶犬欺生;一个昏天，如何扬眉吐气。","level":"中平","brief":"凡事艰辛，须吃苦耐劳，方能出头。"},{"id":75,"title":"隋杨广夜看琼花","poem":"天不佑之，时不合也;花被风折，人在海底。","level":"下下","brief":"有险不吉，宜戒贪图享乐，防祸于未然。"},{"id":76,"title":"六出祁山","poem":"水落石出，荣华已矣!若得一通，除非再起;不宜前进，当守时势。","level":"下下","brief":"凡事不吉，劳而无功，宜另寻他策。"},{"id":77,"title":"渭水访贤","poem":"前车已覆，当为殷鉴;安份守命，自然顺便。","level":"中吉","brief":"待时则吉，良机将至，耐心守候。"},{"id":78,"title":"赵子龙救阿斗","poem":"墙倾屋拆，大势已裂;防而无悔，土崩地决。","level":"中平","brief":"险阻艰辛，护主之心可嘉，终能脱险。"},{"id":79,"title":"庄子鼓盆歌","poem":"不是知音不与论，只看镜破风不正;逆水莫行舟，气散宜当尽。","level":"下下","brief":"不吉之兆，宜看淡生死得失。"},{"id":80,"title":"三国纷争","poem":"三分而已，何须望奢;人要回家，只待日西斜。","level":"中平","brief":"凡事艰辛，宜知足常乐，莫争长短。"},{"id":81,"title":"合兵破曹火烧赤壁","poem":"合而分，分而合;天时人事，雨斟酌。","level":"中吉","brief":"须借人相助方吉，众志成城。"},{"id":82,"title":"泥马渡康王","poem":"月已落，风又紧，舟无蓬，水底影;若要如心，三春一景。","level":"中吉","brief":"险中有救，绝处逢生，天助自助。"},{"id":83,"title":"张士贵投军","poem":"马已疲，人又疾;天不从人，何须亟亟。","level":"下下","brief":"不吉之兆，几近绝境，宜安守勿动。"},{"id":84,"title":"蒙正赏月","poem":"秋风正好月当中，忽被雨朦胧;如何往，难成功;不宜谋，须神工。","level":"中平","brief":"名利未遂，宜静待时机，勿强求。"},{"id":85,"title":"伦文叙不第","poem":"一去中阻，云雾不开;且自宽怀，须许善愿无碍。","level":"中吉","brief":"耐守则吉，暂时的失意不必灰心。"},{"id":86,"title":"槐阴分别","poem":"席已散堂中，寂寞恐难看;若得重欢，只待一轮月上。","level":"中平","brief":"凡事平平，婚姻不吉，宜随缘。"},{"id":87,"title":"孔子在陈","poem":"锦绣不成文，只恨修之短;挽回时命，鸡鼠猪牛，也宜推让，问过收成子罕上。","level":"中吉","brief":"逢凶化吉之兆，圣贤尚困，终得脱。"},{"id":88,"title":"伯牙访友","poem":"悔亡悔亡，空耗两难。人在东，西何可遇，莫劳心力待时遇。","level":"下下","brief":"不吉之兆，知音难遇，宜守静。"},{"id":89,"title":"七擒孟获","poem":"隔了几重山与水，前途终是隔难行;只待草头人，方可两成谋。","level":"中吉","brief":"中吉之运，以德服人，终能收服。"},{"id":90,"title":"祭李彦贵","poem":"雨打梨花，人在天涯。功名多费力，图事不能成。阴阳反复，时过令人嗟。","level":"中吉","brief":"险中有救，诚心可感，终得平安。"},{"id":91,"title":"李旦受劫","poem":"莫急走，看绊跌，云掩风霾，终是一场冤业;若冤业，修省方免得。","level":"中吉","brief":"历尽艰辛，最后皆吉，坚持到底。"},{"id":92,"title":"玄德离许都","poem":"雷声大，雨点小，纵好不好;事在解铃人，福自改过，多行善可保。","level":"中吉","brief":"小心行事定卜吉兆，谨言慎行。"},{"id":93,"title":"梁山伯路遥访友","poem":"心急马行迟，妄干何有益;且自安份，天神护吉。","level":"中平","brief":"安分守己，情缘可待，莫强求。"},{"id":94,"title":"蒙正捞斋","poem":"事已如此，悔之何及;纵有不祥，还宜阴骘。","level":"上吉","brief":"先难后易，终吉，苦尽甘来。"},{"id":95,"title":"孟尝君被害","poem":"已入笼，何可脱;已落空，难觅着。遇鸡鼠，自知觉;病果起，勿服药。","level":"中吉","brief":"逢凶化吉，危难中得贵人相救。"},{"id":96,"title":"孟姜女寻夫","poem":"潭深鱼不饵，鸟飞难弋获;时势已如此，一笑又一哭。","level":"下下","brief":"万事不利，宜节哀顺变，静待时过。"},{"id":97,"title":"范仲淹卖字","poem":"吉凶相半人宜识，莫任劳劳损无益;有时天运一回还，自然天道无痕迹。","level":"上吉","brief":"终吉之兆，虽贫不改其志，终有成。"},{"id":98,"title":"姜太公渭水钓鱼","poem":"东不如西，也要识时，是乃有命;可不知之，知时命，久谋自合宜。","level":"中吉","brief":"待时则吉，愿者上钩，良机自至。"},{"id":99,"title":"邓艾钟会入川","poem":"可以转移，可以了结;只恨运命屯邅，故此一得一失。","level":"中吉","brief":"先凶后吉，历经波折，终成大功。"},{"id":100,"title":"孔明求寿","poem":"月落星沉，风生雨至;只要龙虎不相争，方可如时利。","level":"下下","brief":"大凶之象，宜修身自省，静待低谷过去。"}];
+const LEVEL_KEY = { '上上':'ss', '上吉':'sj', '中吉':'zj', '中平':'zp', '下下':'xx' };
+
+const screen1 = document.getElementById('screen1');
+const screen2 = document.getElementById('screen2');
+const scene = document.getElementById('scene');
+const shaker = document.getElementById('shaker');
+const stickMid = document.getElementById('stickMid');
+const stickInner = document.getElementById('stickInner');
+const riseSeal = document.getElementById('riseSeal');
+const sticks = Array.prototype.slice.call(document.querySelectorAll('.stick-inner'));
+const againBtn = document.getElementById('againBtn');
+
+// ===== 音效：精致竹片相碰 =====
+let audioCtx = null;
+function ensureAudio() {
+  if (!audioCtx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (AC) audioCtx = new AC();
+  }
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+// 一次「竹片相碰」：短促噪声瞬态 + 木质共振体
+function clack(time, intensity) {
+  const ctx = audioCtx;
+  // 噪声瞬态（竹片碰击的“嗒”）
+  const dur = 0.018 + intensity * 0.02;
+  const buf = ctx.createBuffer(1, Math.max(1, Math.floor(ctx.sampleRate * dur)), ctx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 3);
+  const src = ctx.createBufferSource(); src.buffer = buf;
+  const bp = ctx.createBiquadFilter(); bp.type = 'bandpass';
+  bp.frequency.value = 1700 + Math.random() * 1400; bp.Q.value = 2.8;
+  const g = ctx.createGain(); g.gain.value = 0.22 + intensity * 0.5;
+  src.connect(bp); bp.connect(g); g.connect(ctx.destination);
+  src.start(time);
+
+  // 木质共振体（低沉短促的“咚”）
+  const o = ctx.createOscillator(); o.type = 'triangle';
+  o.frequency.setValueAtTime(820 + Math.random() * 620, time);
+  o.frequency.exponentialRampToValueAtTime(360, time + 0.085);
+  const og = ctx.createGain();
+  og.gain.setValueAtTime(0.12 + intensity * 0.22, time);
+  og.gain.exponentialRampToValueAtTime(0.0001, time + 0.14);
+  o.connect(og); og.connect(ctx.destination);
+  o.start(time); o.stop(time + 0.16);
+}
+
+function playShakeSounds() {
+  ensureAudio(); if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const n = 20;
+  for (let k = 0; k < n; k++) {
+    const t = now + (k * (3.3 / n)) + Math.random() * 0.035;
+    const intensity = 0.3 + Math.pow(k / n, 1.4) * 0.7;   // 越到后越重
+    clack(t, intensity);
+    // 偶尔两片几乎同时相碰
+    if (k % 3 === 1) clack(t + 0.012 + Math.random() * 0.02, intensity * 0.8);
+  }
+}
+
+function playRise() {
+  ensureAudio(); if (!audioCtx) return;
+  const ctx = audioCtx, now = ctx.currentTime;
+  clack(now, 1.0);
+  clack(now + 0.07, 0.85);
+  // 出签后的清音（钟磬）
+  [880, 1318.5, 1760].forEach(function (f, i) {
+    const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = f;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, now + 0.1);
+    g.gain.exponentialRampToValueAtTime(0.15 / (i + 1), now + 0.13);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 1.5);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(now + 0.1); o.stop(now + 1.6);
+  });
+}
+
+// ===== 屏切换 =====
+function goScreen(n) {
+  const from = n === 2 ? screen1 : screen2;
+  const to = n === 2 ? screen2 : screen1;
+  from.classList.add('fade-out');
+  setTimeout(function () {
+    from.classList.remove('active', 'fade-out');
+    to.classList.add('active');
+    window.scrollTo(0, 0);
+  }, 300);
+}
+
+// ===== 重置签筒 =====
+function resetTube() {
+  shaker.classList.remove('shaking');
+  stickMid.classList.remove('rising');
+  sticks.forEach(function (s) { s.classList.remove('rattling'); });
+  riseSeal.textContent = '';
+  riseSeal.style.opacity = '';
+}
+
+let busy = false;
+
+function draw() {
+  if (busy) return;
+  busy = true;
+  resetTube();
+
+  const chosen = Math.floor(Math.random() * 100);
+  const d = DATA[chosen];
+
+  // 填充结果（先备好，切页后即显示）
+  document.getElementById('resNo').textContent = '第 ' + d.id + ' 签';
+  const badge = document.getElementById('resBadge');
+  badge.textContent = d.level;
+  badge.dataset.level = LEVEL_KEY[d.level] || 'zp';
+  document.getElementById('resTitle').innerHTML = '典故 · <b>' + d.title + '</b>';
+  document.getElementById('resPoem').innerHTML = d.poem.replace(/[;；]/g, '<br>');
+  document.getElementById('resBrief').textContent = d.brief;
+
+  // 开始摇签
+  shaker.classList.add('shaking');
+  sticks.forEach(function (s) { s.classList.add('rattling'); });
+  playShakeSounds();
+
+  // 摇完 → 抬签 → 切页
+  setTimeout(function () {
+    shaker.classList.remove('shaking');
+    sticks.forEach(function (s) { s.classList.remove('rattling'); });
+    riseSeal.textContent = d.id;
+    stickMid.classList.add('rising');
+    playRise();
+    setTimeout(function () {
+      goScreen(2);
+      busy = false;
+    }, 950);
+  }, 3500);
+}
+
+scene.addEventListener('click', draw);
+
+againBtn.addEventListener('click', function () {
+  goScreen(1);
+  setTimeout(resetTube, 350);
+});
+</script>
+</body>
+</html>
